@@ -1,0 +1,131 @@
+version: 0.15-1
+
+
+mqtt:
+  enabled: false
+
+
+ffmpeg:
+  hwaccel_args: preset-nvidia
+
+
+auth:
+  reset_admin_password: false
+  # ddc34f231bcbeb08979e1179471bc0ae
+
+
+audio:
+  enabled: true
+  listen:
+    - bark
+    - growling
+    - scream
+    - fire_alarm
+
+
+birdseye:
+  enabled: true
+  mode: continuous
+
+
+go2rtc:
+  streams:
+    tapo_1:
+      - ffmpeg:rtsp://{FRIGATE_TAPO_USER}:{FRIGATE_TAPO_PASS}@tapo1-cam.internal:554/stream1
+      - ffmpeg:tapo_1#audio=aac
+      - tapo://{FRIGATE_TAPO_USER}:{FRIGATE_TAPO_PASS_SHA}@tapo1-cam.internal
+    tapo_2:
+      - ffmpeg:rtsp://{FRIGATE_TAPO_USER}:{FRIGATE_TAPO_PASS}@tapo2-cam.internal:554/stream1
+      - ffmpeg:tapo_2#audio=aac
+      - tapo://{FRIGATE_TAPO_USER}:{FRIGATE_TAPO_PASS_SHA}@tapo2-cam.internal
+
+
+cameras:
+
+  inside:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: 
+            rtsp://{FRIGATE_VIEWER_USER}:{FRIGATE_VIEWER_PASS}@inside-cam.internal/cam/realmonitor?channel=1&subtype=0 # default stream
+          roles:
+            - audio
+            - detect
+            - record
+    detect:
+      enabled: false
+      width: 3840
+      height: 2160
+    motion:
+      mask:
+        - 0.738,0.029,0.737,0.088,0.967,0.099,0.964,0.022
+        - 0.504,0.111,0.418,0.262,0.5,0.418,0.679,0.292,0.67,0.183
+  patio:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: 
+            rtsp://{FRIGATE_VIEWER_USER}:{FRIGATE_VIEWER_PASS}@patio-cam.internal/cam/realmonitor?channel=1&subtype=0 # default stream
+          roles:
+            - audio
+            - detect
+            - record
+    detect:
+      enabled: false
+      width: 3840
+      height: 2160
+    motion:
+      mask: 0.965,0.031,0.966,0.081,0.739,0.088,0.738,0.025
+
+  tapo_1:
+    enabled: true
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/tapo_1
+          input_args: preset-rtsp-generic
+          roles:
+            - record
+            - detect
+            - audio
+    onvif:
+      host: tapo1-cam.internal
+      port: 2020
+      user: '{FRIGATE_TAPO_USER}'
+      password: '{FRIGATE_TAPO_PASS}'
+    detect:
+      enabled: false
+      width: 2304
+      height: 1296
+    motion:
+      mask: 0.321,0.052,0.316,0.008,0.001,0.004,0.006,0.06
+
+  tapo_2:
+    enabled: true
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/tapo_2
+          input_args: preset-rtsp-generic
+          roles:
+            - record
+            - detect
+            - audio
+    onvif:
+      host: tapo2-cam.internal
+      port: 2020
+      user: '{FRIGATE_TAPO_USER}'
+      password: '{FRIGATE_TAPO_PASS}'
+    detect:
+      enabled: false
+      width: 2304
+      height: 1296
+    motion:
+      mask: 0.001,0.046,0.327,0.039,0.324,0.001,0.001,0.003
+camera_groups:
+  Birdseye:
+    order: 1
+    icon: LuAccessibility
+    cameras: birdseye
